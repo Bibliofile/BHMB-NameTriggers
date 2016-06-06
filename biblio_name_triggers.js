@@ -12,6 +12,7 @@ var biblio_name_triggers = MessageBotExtension('biblio_name_triggers');
 (function() {
     //Setup
     var _this = this;
+    this.setAutoLaunch(true);
 
     try {
         this.messages = JSON.parse(localStorage.getItem(this.id + '_messages' + window.worldId));
@@ -112,7 +113,7 @@ var biblio_name_triggers = MessageBotExtension('biblio_name_triggers');
                 .replace(/{{Name}}/g, data.name[0] + data.name.substr(1).toLocaleLowerCase())
                 .replace(/{{ip}}/gi, data.ip)
         );
-    }
+    };
 
     this.addJoinListener('name_triggers', function(data) {
         // console.log(data);
