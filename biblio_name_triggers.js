@@ -9,79 +9,71 @@
 
 var biblio_name_triggers = MessageBotExtension('biblio_name_triggers');
 
-(function() {
-    //Setup
-    var _this = this;
-    this.setAutoLaunch(true);
-
-    try {
-        this.messages = JSON.parse(localStorage.getItem(this.id + '_messages' + window.worldId));
-    } catch(e) {
-        this.messages = [];
-    } finally {
-        if (this.messages === null) {
-            this.messages = [];
-        }
-    }
-    var currentID = 0;
-    var template = '<label>When the player\'s name contains </label><input class="t" value="{{trigger}}"/><label> say </label><input class="m" value="{{message}}"/><br> <a>Delete</a>';
-
-    this.addTab('Name Triggers', 'name_triggers', "msgs");
-
-    var tab = document.querySelector('#mb_' + this.id + '_name_triggers');
-
-    tab.innerHTML = '<h3 class="descgen">These are checked when a player joins the server.</h3> <span class="descdet">You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="add">+</span><div id="name_triggers_Msgs"></div>';
-
-    var container = tab.querySelector('#name_triggers_Msgs');
-
-
-
-    this.debug = function() {
-        return container;
-    };
-
-    //When uninstalled, remove messages and tab
-    this.uninstall = function() {
+(function(ext) {
+    ext.setAutoLaunch(true);
+    ext.uninstall = function() {
         //Remove the tab
-        _this.ui.removeTab(_this.id + '_name_triggers');
+        ext.ui.removeTab(ext.tab);
 
-        //Remove stored messages
-        Object.keys(localStorage).forEach(function(key) {
-            if (key.indexOf(_this.id + '_messages')) {
-                localStorage.removeItem(key);
-            }
-        });
+        //Remove saved messages
+        ext.storage.clearNamespace(ext.id);
+
+        //Remove listeners
+        ext.hook.remove('world.join', nameCheck);
     };
+
+    //Setup
+    var messages = ext.storage.getObject(ext.id + '_messages', []);
+
+    ext.tab = ext.ui.addTab('Name Triggers', 'messages');
+
+
+    var style = "<style>.name_triggers_box input { width: calc(100% - 10px);border: 2px solid #666;} #name_triggers_msgs { padding-top: 8px; margin-top: 8px; border-top: 1px solid; height: calc(100vh - 180px);}</style>";
+    var template = '<template id="' + ext.id + '_template" style="display:none;"><div class="third-box name_triggers_box"><label>When the player\'s name contains </label><input class="t" value=""/><label> say </label><input class="m" value=""/><br> <a>Delete</a></div></template>';
+
+    ext.tab.innerHTML = style + template + '<h3 style="margin: 0 0 5px 0;">These are checked when a player joins the server.</h3><span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <span class="top-right-button add">+</span><div id="name_triggers_msgs"></div>';
+
+    //IE 9 fix
+    (function(template) {
+        var content = template.childNodes;
+        var fragment = document.createDocumentFragment();
+
+        for (var i = 0; i < content.length; i++) {
+            fragment.appendChild(content[i]);
+        }
+
+        template.content = fragment;
+    }(ext.tab.querySelector('template')));
+
+    var container = ext.tab.querySelector('#name_triggers_msgs');
 
     //Load saved config
-    this.messages.forEach(addMessage);
+    messages.forEach(addMessage);
 
-    this.saveConfig = function() {
-        // console.log('Saving config.', container.children.length);
-        _this.messages = [];
+    ext.saveConfig = function() {
+        messages = [];
         Array.from(container.children).forEach(function(child) {
-            _this.messages.push({
+            messages.push({
                 message: child.querySelector('.m').value,
                 trigger: child.querySelector('.t').value
             });
         });
-        localStorage.setItem(_this.id + '_messages' + window.worldId, JSON.stringify(_this.messages));
+        ext.storage.set(ext.id + '_messages', messages);
     };
 
     //To add a message to the page. obj must be in the format {trigger: 'something', message: 'something'}
     function addMessage(obj) {
-        var div = document.createElement('div');
-        div.classList.add('msg');
-        div.id = nextID();
-        div.innerHTML = template.replace(/{{trigger}}/g, obj.trigger).replace(/{{message}}/g, obj.message);
+        ext.ui.buildContentFromTemplate('#' + ext.id + '_template', '#name_triggers_msgs',
+        [
+            {selector: '.m', value: obj.message},
+            {selector: '.t', value: obj.trigger}
+        ]);
 
-        container.appendChild(div);
-
-        div.querySelector('a').addEventListener('click', deleteMessage);
+        ext.tab.querySelector('#name_triggers_msgs > div:last-of-type a').addEventListener('click', deleteMessage);
     }
 
     function deleteMessage(event) {
-        bot.ui.alert('Really delete this message?',
+        ext.ui.alert('Really delete this message?',
                     [
                         {text: 'Delete', style: 'danger', thisArg: event.target.parentElement, action: function() {
                             this.remove();
@@ -93,34 +85,29 @@ var biblio_name_triggers = MessageBotExtension('biblio_name_triggers');
     }
 
     //Adds an empty message to the page.
-    function addEmptyMessage() {
+    ext.tab.querySelector('.add').addEventListener('click', function() {
         addMessage({trigger: '', message: ''});
-    }
+    });
 
-    //Gets the next ID to uniquely identify a message.
-    function nextID() {
-        return 'name_triggers_' + currentID++;
-    }
+    //Save config when messages changed
+    container.addEventListener('change', ext.saveConfig);
 
-    //Wait for user input
-    tab.querySelector('.add').addEventListener('click', addEmptyMessage);
-    container.addEventListener('change', this.saveConfig);
-
-    this.send = function(msg, data) {
-        _this.core.send(
-            msg.replace(/{{NAME}}/g, data.name)
-                .replace(/{{name}}/g, data.name.toLocaleLowerCase())
-                .replace(/{{Name}}/g, data.name[0] + data.name.substr(1).toLocaleLowerCase())
-                .replace(/{{ip}}/gi, data.ip)
+    function send(msg, name, ip) {
+        ext.bot.send(
+            msg.replace(/{{NAME}}/g, name)
+                .replace(/{{name}}/g, name.toLocaleLowerCase())
+                .replace(/{{Name}}/g, name[0] + name.substr(1).toLocaleLowerCase())
+                .replace(/{{ip}}/gi, ip)
         );
-    };
+    }
 
-    this.addJoinListener('name_triggers', function(data) {
-        // console.log(data);
-        _this.messages.forEach(function(msg) {
-            if (data.name.indexOf(msg.trigger.toLocaleUpperCase()) != -1) {
-                _this.send(msg.message, data);
+    function nameCheck(name, ip) {
+        messages.forEach(function(msg) {
+            if (name.toLocaleUpperCase().includes(msg.trigger.toLocaleUpperCase())) {
+                send(msg.message, name, ip);
             }
         });
-    });
-}.call(biblio_name_triggers));
+    }
+
+    ext.hook.listen('world.join', nameCheck);
+}(biblio_name_triggers));
