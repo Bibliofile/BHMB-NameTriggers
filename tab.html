@@ -1,0 +1,28 @@
+<style>
+    #name_triggers_msgs { padding-top: 8px; margin-top: 8px; border-top: 1px solid;}
+</style>
+<template id="biblio_name_triggers_template" style="display:none;">
+    <div class="column is-one-third-desktop is-half-tablet">
+        <div class="box">
+            <label>
+                When the player&apos;s name contains
+                <input class="input t" value=""/>
+            </label>
+            <label>
+                say
+                <input class=" input m" value=""/>
+            </label>
+            <br>
+            <a>Delete</a>
+        </div>
+    </div>
+</template>
+<div class="container is-fluid">
+    <section class="section is-small">
+        <span class="button is-primary is-pulled-right">+</span>
+        <h3>These are checked when a player joins the server.</h3>
+        <span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span>
+        <label>Exact name match: <input  class="checkbox" type="checkbox"/></label>
+    </section>
+</div>
+<div id="name_triggers_msgs" class="columns is-multiline"></div>

@@ -28,12 +28,7 @@ var biblio_name_triggers = MessageBotExtension('biblio_name_triggers');
 
     ex.tab = ex.ui.addTab('Name Triggers', 'messages');
 
-
-    var style = "<style>.name_triggers_box input { width: calc(100% - 10px);border: 2px solid #666;} #name_triggers_msgs { padding-top: 8px; margin-top: 8px; border-top: 1px solid; height: calc(100vh - 180px);}</style>";
-    var template = '<template id="' + ex.id + '_template" style="display:none;"><div class="third-box name_triggers_box"><label>When the player\'s name contains </label><input class="t" value=""/><label> say </label><input class="m" value=""/><br> <a>Delete</a></div></template>';
-
-    ex.tab.innerHTML = style + template + '<h3 style="margin: 0 0 5px 0;">These are checked when a player joins the server.</h3><span>You can use {{Name}}, {{NAME}}, {{name}}, and {{ip}} in your message.</span> <label>Exact name match: <input type="checkbox"/></label> <span class="top-right-button add">+</span><div id="name_triggers_msgs"></div>';
-
+    ex.tab.innerHTML = '<style>#name_triggers_msgs{padding-top: 8px; margin-top: 8px; border-top: 1px solid;}</style><template id="biblio_name_triggers_template" style="display:none;"> <div class="column is-one-third-desktop is-half-tablet"> <div class="box"> <label> When the player&apos;s name contains <input class="input t" value=""/> </label> <label> say <input class=" input m" value=""/> </label> <br><a>Delete</a> </div></div></template><div class="container is-fluid"> <section class="section is-small"> <span class="button is-primary is-pulled-right">+</span> <h3>These are checked when a player joins the server.</h3> <span>You can use{{Name}},{{NAME}},{{name}}, and{{ip}}in your message.</span> <label>Exact name match: <input class="checkbox" type="checkbox"/></label> </section></div><div id="name_triggers_msgs" class="columns is-multiline"></div>';
     var container = ex.tab.querySelector('#name_triggers_msgs');
 
     //Load saved config
@@ -80,7 +75,7 @@ var biblio_name_triggers = MessageBotExtension('biblio_name_triggers');
     }
 
     //Adds an empty message to the page.
-    ex.tab.querySelector('.add').addEventListener('click', function() {
+    ex.tab.querySelector('.button').addEventListener('click', function() {
         addMessage({trigger: '', message: ''});
     });
 
