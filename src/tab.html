@@ -1,0 +1,36 @@
+<template>
+  <div class="box">
+    <div class="columns">
+      <div class="column is-narrow">
+        <p class="has-text-weight-bold">Name</p>
+      </div>
+      <div class="column is-2-desktop">
+        <input class="input is-small" data-target="trigger">
+      </div>
+      <div class="column is-narrow">
+        <p class="has-text-weight-bold">Message</p>
+      </div>
+      <div class="column">
+        <textarea class="textarea is-small is-fluid" data-target="message"></textarea>
+      </div>
+      <div class="column is-narrow">
+        <button class="button is-small is-danger is-outlined" data-do="delete">Delete</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<div class="container is-widescreen">
+  <section class="section is-small">
+    <span class="button is-primary is-adding-message" title="Add message">+</span>
+    <h3 class="title is-4">Name Triggers</h3>
+    <label>Exact match: <input type="checkbox"></label>
+    <ul>
+      <li>The name will be checked when a player joins the server.</li>
+      <li>If exact match is turned on, the player's name must match exactly, otherwise it need only contain the name listed here.</li>
+      <li>{{NAME}}, {{Name}}, and {{name}} in the message will be replaced with the user's name.</li>
+    </ul>
+  </section>
+
+  <div class="messages-container"></div>
+</div>

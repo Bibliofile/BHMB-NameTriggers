@@ -1,0 +1,21 @@
+{
+  "name": "BHMB-NameTriggers",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Bibliofile/BHMB-NameTriggers.git",
+  "author": "Bibliofile <bibliofilegit@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^0.52.3",
+    "rollup-plugin-string": "^2.0.2",
+    "rollup-plugin-typescript2": "^0.9.0",
+    "typescript": "^2.6.2"
+  },
+  "dependencies": {
+    "@bhmb/bot": "^7.0.10",
+    "@bhmb/ui": "^1.0.7"
+  },
+  "scripts": {
+    "build": "rollup --config"
+  }
+}
